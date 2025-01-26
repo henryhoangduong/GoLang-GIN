@@ -14,6 +14,7 @@ type TestModel struct {
 
 func main() {
 	r := gin.Default()
+    
 	user := r.Group("user")
 	{
 		user.GET("", func(c *gin.Context) {

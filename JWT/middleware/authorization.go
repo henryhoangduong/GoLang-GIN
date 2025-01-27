@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"jwt/models"
 	"jwt/token"
 	"net/http"
@@ -33,9 +34,32 @@ func ValidateToken() gin.HandlerFunc {
 		if len(context.Keys) == 0 {
 			context.Keys = make(map[string]interface{})
 		}
-		context.Keys["ComapnyId"] = claims.ComapnyId
+		context.Keys["ComapnyId"] = claims.CompanyId
 		context.Keys["Username"] = claims.Username
 		context.Keys["Roles"] = claims.Roles
 	}
 }
-func Authorization(validRoles []int) gin.HandlerFunc {}
+func Authorization(validRoles []int) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if len(ctx.Keys) == 0 {
+			ReturnUnauthorized(ctx)
+		}
+		rolesVal := ctx.Keys["Roles"]
+		fmt.Println("roles", rolesVal)
+		if rolesVal == nil {
+			ReturnUnauthorized(ctx)
+		}
+		roles := rolesVal.([]int)
+		validation := make(map[int]int)
+		for _, val := range roles {
+			validation[val] = 0
+		}
+
+		for _, val := range validRoles {
+			if _, ok := validation[val]; !ok {
+				ReturnUnauthorized(ctx)
+			}
+		}
+
+	}
+}
